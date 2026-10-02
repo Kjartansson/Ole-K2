@@ -70,6 +70,14 @@ chrome.runtime.onMessage.addListener((msg) => {
   }
 });
 
+// First install without a pairing: open the pairing page so the user never
+// has to hunt for it. Dev installs with a token.js connect silently.
+chrome.runtime.onInstalled.addListener(() => {
+  chrome.storage.local.get("token", ({ token: stored }) => {
+    if (!stored && !token) chrome.runtime.openOptionsPage();
+  });
+});
+
 function send(obj) {
   if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify(obj));
 }
