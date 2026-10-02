@@ -13,9 +13,8 @@
 
 let token = null;
 let policyDisabled = false;
-try {
-  ({ TOKEN: token } = await import("./token.js")); // dev installs only; not shipped
-} catch { /* store/enterprise installs pair via options or policy */ }
+try { importScripts("token.js"); token = self.OLE_K2_TOKEN || null; }
+catch { /* store/enterprise installs pair via the options page or policy */ }
 
 async function loadToken() {
   // Chrome Enterprise policy wins over everything: an admin can deploy the

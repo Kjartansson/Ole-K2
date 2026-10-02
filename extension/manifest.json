@@ -18,7 +18,7 @@
     }
   },
   "options_page": "options.html",
-  "background": { "service_worker": "background.js", "type": "module" },
+  "background": { "service_worker": "background.js" },
   "permissions": ["tabs", "scripting", "alarms", "storage"],
   "host_permissions": ["<all_urls>"],
   "storage": { "managed_schema": "schema.json" },
