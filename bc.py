@@ -24,7 +24,7 @@ import sys
 cmd = json.loads(sys.argv[1]) if len(sys.argv) > 1 else {"cmd": "ping"}
 s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
 s.settimeout(float(cmd.get("timeout_s", 60)) + 15)
-s.connect("/tmp/chrome-bridge.sock")
+s.connect(os.path.join(os.environ.get("XDG_RUNTIME_DIR", "/tmp"), "ole-k2-bridge.sock"))
 s.sendall((json.dumps(cmd) + "\n").encode())
 s.shutdown(socket.SHUT_WR)
 data = b""

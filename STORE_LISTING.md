@@ -4,32 +4,67 @@
 Ole K2
 
 ## Summary (max 132 chars)
-Let a local AI assistant drive your browser — visibly. Loopback-only, paired with a token. Companion server required.
+Kimi's hands in Chrome — the AI clicks, types and reads pages for you. Local only, token-paired, every action visible.
 
 ## Description
 
-Ole K2 is Kimi's hands in Chrome: instead of watching an AI assistant
-describe what to click, you let it do the clicking. The assistant runs on
-your own machine (Kimi Code or any MCP-compatible agent) and Ole K2 is its
-browser half — it reads pages, clicks buttons, types into fields, fills
-forms and takes screenshots, in your real browser, with your accounts.
+KIMI'S HANDS IN CHROME
 
-EVERY action is visible while it happens: a red outline flashes over the
-element being used, and a badge in the corner shows what the bridge is
-doing. The toolbar icon shows ON whenever the bridge is connected. Nothing
-is silent.
+A lot of browser work is repetitive: forms, portals, pages with no export
+button. Ole K2 lets your AI assistant do it instead of you. The assistant
+runs on your own machine — Kimi Code or any MCP-compatible agent — and
+Ole K2 is its browser half: it reads pages, clicks, types, navigates, fills
+forms and takes screenshots, in your real browser, with your sessions.
 
-Security by design:
-- Loopback only — the extension talks exclusively to 127.0.0.1. No data
-  ever leaves your machine through Ole K2.
-- Pairing token — you paste a token once (shown by the companion server);
-  without it, nothing can connect. Enterprises can deploy or disable it by
-  policy.
-- Fixed action vocabulary — the extension cannot run arbitrary code, only
-  its built-in verbs (click, type, read, navigate, screenshot, …).
+You watch it happen. Every click flashes a red outline on the element being
+used, a badge in the corner shows what the bridge is doing, and the toolbar
+icon shows ON whenever the bridge is connected. You step in whenever you
+want.
 
-Requires the free companion server and a compatible agent:
+WHAT PEOPLE USE IT FOR
+
+- "Check my site the way a user sees it" — the agent browses, you build
+- Repetitive web chores: filling, clicking through, gathering
+- Letting an agent work in pages that need your login — the session is
+  yours, the machine is yours, nothing passes a third party
+- Browser-driven testing while you write code
+
+YOU'RE IN CONTROL
+
+- Loopback only: Ole K2 talks exclusively to a server on 127.0.0.1. No
+  data leaves your machine through this extension — there is no cloud
+  component at all.
+- Token pairing: the bridge answers only to the token you paste once (or
+  that your admin deploys). No token, no connection.
+- Fixed vocabulary: the extension cannot execute arbitrary code. It has a
+  short list of verbs — click, type, read, navigate, screenshot — and
+  nothing else.
+- Honest signal: the ON badge and the red flash make automation visible
+  at all times.
+
+FOR ENTERPRISE
+
+Admins can force-install or allowlist Ole K2 by ID, deploy the pairing
+token via managed policy (schema included), or disable the bridge org-wide
+with one policy flag. No telemetry, no remote code, per-command audit lines
+on the companion server. MIT licensed.
+
+FOR DEVELOPERS
+
+The companion server speaks MCP (Model Context Protocol): Kimi Code gets
+browser_* tools out of the box, and any MCP client can drive the same
+vocabulary. Source, protocol notes and setup:
 https://github.com/Kjartansson/Ole-K2
+
+GETTING STARTED
+
+1. Install this extension
+2. Get the free companion server from the GitHub page and run install.sh
+3. Paste the pairing token it prints into the extension's options page
+4. Ask your assistant to do something in the browser — and watch it happen
+
+Note: Chrome on desktop. Not for Chromium forks that lack MV3 service
+workers, and not for mobile.
 
 ## Category
 Developer Tools
