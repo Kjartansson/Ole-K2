@@ -1,0 +1,12 @@
+{
+  "manifest_version": 3,
+  "name": "Ole K2",
+  "version": "1.0.0",
+  "description": "Local-only automation bridge. Lets tools on this machine drive this browser via 127.0.0.1. Never publish this; it is remote control by design.",
+  "permissions": ["tabs", "scripting", "activeTab", "alarms"],
+  "host_permissions": ["<all_urls>"],
+  "background": { "service_worker": "background.js", "type": "module" },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; connect-src ws://127.0.0.1:*"
+  }
+}

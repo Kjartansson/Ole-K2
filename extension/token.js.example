@@ -1,0 +1,4 @@
+// Copy this file to token.js and put a long random string in it.
+// The same string goes in the server-side "token" file (see README).
+// token.js is gitignored on purpose: NEVER commit a real token.
+export const TOKEN = "change-me-to-a-long-random-string";
