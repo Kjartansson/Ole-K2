@@ -86,6 +86,25 @@ json.dump(data, open(path, "w"), indent=2)
 print("✓ Kimi Code MCP registered in", path)
 EOF
 
+# Same MCP server for Claude Code and Claude Desktop, when installed
+python3 - "$HOME" "$HERE" <<'PYEOF'
+import json, os, sys
+home, here = sys.argv[1], sys.argv[2]
+entry = {"command": f"{here}/.venv/bin/python", "args": [f"{here}/mcp_server.py"]}
+for path in (f"{home}/.claude.json", f"{home}/.config/Claude/claude_desktop_config.json"):
+    if not os.path.exists(path):
+        continue
+    try:
+        data = json.load(open(path))
+    except Exception:
+        continue
+    servers = data.setdefault("mcpServers", {})
+    if servers.get("ole-k2") != entry:
+        servers["ole-k2"] = entry
+        json.dump(data, open(path, "w"), indent=2)
+    print("✓ MCP registered in", path)
+PYEOF
+
 echo
 echo "Almost done. Two manual steps:"
 echo
@@ -93,10 +112,9 @@ echo "  1. Chrome → chrome://extensions → Developer mode → Load unpacked �
 echo "     $HERE/extension"
 echo "     (after the Web Store release: just install 'Ole K2' from the store)"
 echo
-echo "  2. Pair: open the extension's options (Details → Extension options)"
-echo "     and paste this token:"
+echo "  2. Pairing: the extension's options page shows a short code — give it"
+echo "     to your AI assistant and it finishes the pairing itself."
+echo "     (Developers can still paste the token manually: $(cat token 2>/dev/null || echo 'created at first pairing'))"
 echo
-echo "     $(cat token)"
-echo
-echo "Then, in Kimi Code, the mcp__ole-k2__* browser tools are available"
-echo "in new sessions. Test: ask Kimi to list your browser tabs."
+echo "Then, in Kimi Code or Claude, the mcp__ole-k2__* browser tools are"
+echo "available in new sessions. Test: ask it to list your browser tabs."

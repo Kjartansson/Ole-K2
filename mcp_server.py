@@ -32,6 +32,7 @@ TOOLS = [
     {"name": "wait_for", "desc": "Wait until a CSS selector exists on the page (timeout_ms, default 30000).", "schema": {"type": "object", "properties": {"selector": {"type": "string"}, "timeoutMs": {"type": "integer"}, "tabId": {"type": "integer"}}, "required": ["selector"]}},
     {"name": "screenshot", "desc": "Capture the visible tab as a PNG (returned base64).", "schema": {"type": "object", "properties": {"tabId": {"type": "integer"}}}},
     {"name": "locale", "desc": "Report the page language and browser locales.", "schema": {"type": "object", "properties": {"tabId": {"type": "integer"}}}},
+    {"name": "pair", "desc": "Pair with the browser extension: the user reads the pairing code shown on the Ole K2 options page.", "schema": {"type": "object", "properties": {"code": {"type": "string"}}, "required": ["code"]}},
 ]
 
 ACTION_CMDS = {"read_text": "read_text", "click": "click", "click_text": "click_text",
@@ -55,7 +56,9 @@ def send_to_bridge(cmd: dict) -> dict:
 
 
 def call_tool(name: str, args: dict) -> dict:
-    if name in ("ping", "list_tabs"):
+    if name == "pair":
+        cmd = {"cmd": "pair", "code": args["code"]}
+    elif name in ("ping", "list_tabs"):
         cmd = {"cmd": name}
     elif name == "navigate":
         cmd = {"cmd": "navigate", "url": args["url"], "timeout_s": args.get("timeout_s", 60)}

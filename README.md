@@ -16,28 +16,26 @@ Every action the agent takes is visible: a red outline flashes over the
 element being clicked or typed into, and a small "Bridge: …" badge appears
 in the corner of the page. No silent automation.
 
-## Setup (5 minutes)
+## Setup (no terminal skills needed)
 
-Requirements: Chrome/Chromium, Python 3.10+.
+1. Get the code: `git clone https://github.com/Kjartansson/Ole-K2.git`
+   (any agent can do this part for you — see step 3)
+2. Chrome → `chrome://extensions` → **Developer mode** → **Load unpacked**
+   → select the `Ole-K2/extension` directory. The pairing page opens by
+   itself and shows a short code like `K2-7X9Q-M4P2`.
+3. Tell your AI assistant: *"Set up Ole K2 — my pairing code is …"* — it
+   runs the companion install, registers the MCP tools, and confirms the
+   code. The pairing page flips to "Paired" by itself.
 
-```bash
-git clone https://github.com/Kjartansson/Ole-K2.git
-cd Ole-K2
-python3 -m venv .venv && .venv/bin/pip install websockets
+Works the same with Kimi Code and Claude (Code or Desktop): `install.sh`
+registers the MCP server with whichever of them is installed. Any
+MCP-compatible client can also talk to `mcp_server.py` directly.
 
-# 1. Create the shared secret (both sides must match)
-python3 -c "import secrets; print(secrets.token_hex(24))" > token
-sed "s/change-me-to-a-long-random-string/$(cat token)/" \
-    extension/token.js.example > extension/token.js
+### Manual/developer setup
 
-# 2. Start the server (stays in foreground; systemd/launchd for permanence)
-.venv/bin/python server.py
-```
-
-3. In Chrome: `chrome://extensions` → **Developer mode** → **Load unpacked**
-   → select the `extension/` directory.
-
-The server prints `extension connected` when the link is up.
+`./install.sh` (venv, deps, autostart, MCP registration) and pair with the
+token it prints — the options page has a developer field for it. Details in
+`docs/autostart.md`.
 
 ## Using it
 

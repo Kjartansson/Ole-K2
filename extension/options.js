@@ -1,13 +1,22 @@
 const input = document.getElementById("token");
 const status = document.getElementById("status");
+const pairingDiv = document.getElementById("pairing");
+const doneDiv = document.getElementById("done");
+const codeEl = document.getElementById("code");
 
-chrome.storage.local.get("token", ({ token }) => {
-  if (token) {
-    status.textContent = "Paired. The bridge connects automatically.";
-    status.className = "ok";
-    input.value = token;
-  }
-});
+function refresh() {
+  chrome.runtime.sendMessage({ type: "pairing_code" }, (res) => {
+    if (!res) return;
+    if (res.paired) {
+      pairingDiv.style.display = "none";
+      doneDiv.style.display = "block";
+    } else {
+      codeEl.textContent = res.code;
+    }
+  });
+}
+refresh();
+setInterval(refresh, 2000);
 
 document.getElementById("save").addEventListener("click", () => {
   const token = input.value.trim();
@@ -20,6 +29,6 @@ document.getElementById("save").addEventListener("click", () => {
     status.textContent = "Saved. Connecting…";
     status.className = "ok";
     chrome.runtime.sendMessage({ type: "reconnect" });
-    setTimeout(() => { status.textContent = "Paired. The bridge connects automatically."; }, 1500);
+    setTimeout(refresh, 1500);
   });
 });

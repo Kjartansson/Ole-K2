@@ -13,8 +13,27 @@
 
 let token = null;
 let policyDisabled = false;
+let pairingCode = null;
+let pairingWs = null;
 try { importScripts("token.js"); token = self.OLE_K2_TOKEN || null; }
 catch { /* store/enterprise installs pair via the options page or policy */ }
+
+// Human-speakable pairing codes: no 0/O, 1/I, no vowels (no accidental words).
+function makePairingCode() {
+  const ABC = "BCDFGHJKMNPQRSTVWXZ23456789";
+  const buf = new Uint8Array(8);
+  crypto.getRandomValues(buf);
+  const raw = [...buf].map((b) => ABC[b % ABC.length]).join("");
+  return "K2-" + raw.slice(0, 4) + "-" + raw.slice(4);
+}
+
+async function getPairingCode() {
+  const stored = await chrome.storage.local.get("pairing_code");
+  if (stored.pairing_code) return stored.pairing_code;
+  pairingCode = makePairingCode();
+  await chrome.storage.local.set({ pairing_code: pairingCode });
+  return pairingCode;
+}
 
 async function loadToken() {
   // Chrome Enterprise policy wins over everything: an admin can deploy the
@@ -42,7 +61,7 @@ const WS_URL = "ws://127.0.0.1:8765";
 let ws = null;
 
 async function connect() {
-  if (!await loadToken()) { setBadge(); return; } // not paired / policy-disabled
+  if (!await loadToken()) { setBadge(); startPairing(); return; } // not paired / policy-disabled
   try {
     ws = new WebSocket(WS_URL);
   } catch {
@@ -62,11 +81,49 @@ async function connect() {
   ws.onerror = () => { try { ws.close(); } catch { /* reconnect via onclose */ } };
 }
 
-chrome.runtime.onMessage.addListener((msg) => {
+// Unpaired mode: hold a connection open presenting the pairing code. The
+// moment someone with local access (the user's AI assistant) confirms the
+// code to the server, the server answers {"paired": token} here — the token
+// is stored and the bridge goes live. No file editing, no scripts for the
+// user: they just read the code off the screen.
+async function startPairing() {
+  const code = await getPairingCode();
+  chrome.action.setBadgeText({ text: "PAIR" });
+  chrome.action.setBadgeBackgroundColor({ color: "#e0442e" });
+  try {
+    pairingWs = new WebSocket(WS_URL);
+  } catch {
+    setTimeout(startPairing, 5000);
+    return;
+  }
+  pairingWs.onopen = () => pairingWs.send(JSON.stringify({ pair: code }));
+  pairingWs.onmessage = async (ev) => {
+    let msg;
+    try { msg = JSON.parse(ev.data); } catch { return; }
+    if (msg.paired) {
+      await chrome.storage.local.set({ token: msg.paired });
+      await chrome.storage.local.remove("pairing_code");
+      token = msg.paired;
+      try { pairingWs.close(); } catch { /* done with it */ }
+      pairingWs = null;
+      setBadge();
+      connect();
+    }
+  };
+  pairingWs.onclose = () => { setTimeout(() => { if (!token) startPairing(); }, 5000); };
+  pairingWs.onerror = () => { try { pairingWs.close(); } catch { /* retry via onclose */ } };
+}
+
+chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
   if (msg && msg.type === "reconnect") {
     token = null; // force a fresh read from storage
     if (ws) { try { ws.close(); } catch { /* dead already */ } }
     connect();
+  }
+  if (msg && msg.type === "pairing_code") {
+    if (token) { sendResponse({ paired: true }); return; }
+    getPairingCode().then((code) => sendResponse({ paired: false, code }));
+    return true; // async response
   }
 });
 

@@ -58,10 +58,13 @@ https://github.com/Kjartansson/Ole-K2
 
 GETTING STARTED
 
-1. Install this extension
-2. Get the free companion server from the GitHub page and run install.sh
-3. Paste the pairing token it prints into the extension's options page
-4. Ask your assistant to do something in the browser — and watch it happen
+1. Install this extension — the pairing page opens on its own
+2. Read the short code on that page to your AI assistant (Kimi Code, Claude)
+   — it installs the free companion server and finishes the pairing
+3. Ask for something in the browser — and watch it happen
+
+No scripts, no terminal, no account. Developers who prefer manual setup:
+github.com/Kjartansson/Ole-K2
 
 Note: Chrome on desktop. Not for Chromium forks that lack MV3 service
 workers, and not for mobile.

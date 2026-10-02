@@ -12,25 +12,36 @@
   #status { margin-top: 12px; font-weight: 600; }
   .ok { color: #137a3f; } .bad { color: #b3261e; }
   ol { padding-left: 20px; }
+  #code { font: 700 32px/1.2 monospace; letter-spacing: 2px; color: #e0442e; margin: 18px 0; }
+  .dim { color: #5f6368; }
+  details { margin-top: 28px; } summary { cursor: pointer; color: #5f6368; }
 </style>
 </head>
 <body>
   <h1>Ole K2 — pair this browser</h1>
-  <p>Ole K2 lets a local AI assistant drive this browser over a loopback-only
-     connection. To keep anyone else from doing that, the extension and the
-     local server share a token. Paste it once, here — it stays in this
-     browser's local storage and is never sent anywhere except the local
-     server on <code>127.0.0.1</code>.</p>
-  <ol>
-    <li>The companion server must run on this machine. Easiest: ask your AI
-        assistant — <i>"Set up Ole K2 from github.com/Kjartansson/Ole-K2"</i> —
-        and it will do everything and hand you the token. Manually:
-        <code>./install.sh</code> in the Ole-K2 folder prints it, or read it
-        with <code>cat token</code>.</li>
-    <li>Paste the token below and press <b>Save &amp; connect</b>.</li>
-  </ol>
-  <input id="token" type="password" placeholder="paste the token here" autocomplete="off">
-  <button id="save">Save &amp; connect</button>
+
+  <div id="pairing">
+    <p>Your AI assistant does the setup. Give it this code:</p>
+    <div id="code">…</div>
+    <p class="dim">Say, for example: <i>“Set up Ole K2 from
+    github.com/Kjartansson/Ole-K2 — my pairing code is the one on this
+    page.”</i> The assistant installs the companion server and pairs; this
+    page updates itself when done. The code only ever travels between this
+    browser and a server on <code>127.0.0.1</code>.</p>
+  </div>
+
+  <div id="done" style="display:none">
+    <p class="ok"><b>Paired.</b> The bridge connects automatically — you never
+    have to open this page again.</p>
+  </div>
+
+  <details>
+    <summary>Manual token entry (developers)</summary>
+    <p class="dim">If you ran <code>install.sh</code> yourself, paste the
+    token it printed:</p>
+    <input id="token" type="password" placeholder="paste the token here" autocomplete="off">
+    <button id="save">Save &amp; connect</button>
+  </details>
   <div id="status"></div>
   <script src="options.js"></script>
 </body>
