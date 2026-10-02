@@ -7,6 +7,27 @@ HERE="$(pwd)"
 
 echo "== Ole K2 setup =="
 
+# 0. Already installed and running? Then there is nothing to do.
+if python3 - <<'EOF' 2>/dev/null
+import json, os, socket
+sock = os.path.join(os.environ.get("XDG_RUNTIME_DIR", "/tmp"), "ole-k2-bridge.sock")
+s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+s.settimeout(2)
+s.connect(sock)
+s.sendall(b'{"cmd":"ping"}\n')
+s.shutdown(socket.SHUT_WR)
+print(s.recv(64).decode())
+EOF
+then
+  echo "✓ an Ole K2 server is already running on this machine — reusing it"
+  echo
+  echo "Pairing token for the extension's options page:"
+  echo
+  echo "  $(cat token 2>/dev/null || echo '(token file not found in this folder — use the existing install)')"
+  echo
+  exit 0
+fi
+
 # 1. Python deps in a private venv
 if [ ! -x .venv/bin/python ]; then
   python3 -m venv .venv
