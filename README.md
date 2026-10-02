@@ -78,3 +78,20 @@ exec actions: `read_text(sel?)` `read_html(sel?)` `click(sel)`
 The extension is OS-independent. The server runs anywhere Python runs; only
 the autostart mechanism is OS-specific (Linux systemd user unit example in
 `docs/autostart.md` — or just run `server.py` in a terminal).
+
+## Enterprise deployment
+
+Ole K2 is policy-manageable like any store extension:
+
+- **Rollout:** force-install or allowlist by ID via `ExtensionInstallForcelist`
+  / `ExtensionInstallAllowlist` once it is on the Web Store.
+- **Managed pairing:** set the `token` policy (schema in
+  `extension/schema.json`) so managed devices pair without any user step.
+- **Kill switch:** set the `disabled` policy to `true` — the extension then
+  never connects, on any managed device.
+
+What admins usually ask, answered up front: no remote code, no telemetry,
+no external network connections (loopback WebSocket only), a fixed action
+vocabulary with no eval, constant-time token comparison, audit lines per
+command on the server (journald when run under systemd), and every action
+visibly flashed in the browser. MIT licensed.

@@ -12,6 +12,7 @@ new one replaces the old.
 from __future__ import annotations
 
 import asyncio
+import hmac
 import json
 import os
 
@@ -20,7 +21,7 @@ import websockets
 HERE = os.path.dirname(os.path.abspath(__file__))
 TOKEN = open(os.path.join(HERE, "token")).read().strip()
 WS_HOST, WS_PORT = "127.0.0.1", 8765
-SOCK = "/tmp/chrome-bridge.sock"
+SOCK = os.path.join(os.environ.get("XDG_RUNTIME_DIR", "/tmp"), "ole-k2-bridge.sock")
 
 state = {"ws": None}
 pending: dict[int, asyncio.Future] = {}
@@ -31,7 +32,7 @@ async def extension_handler(ws):
     global seq
     try:
         hello = json.loads(await asyncio.wait_for(ws.recv(), 10))
-        if hello.get("auth") != TOKEN:
+        if not hmac.compare_digest(str(hello.get("auth", "")), TOKEN):
             await ws.close(4001, "bad token")
             return
         if state["ws"] is not None:
@@ -56,6 +57,7 @@ async def cli_handler(reader: asyncio.StreamReader, writer: asyncio.StreamWriter
     try:
         line = await asyncio.wait_for(reader.readline(), 10)
         cmd = json.loads(line.decode())
+        print(f"audit: cmd={cmd.get('cmd')} action={cmd.get('action')}", flush=True)
         if state["ws"] is None:
             raise RuntimeError("extension not connected")
         seq += 1

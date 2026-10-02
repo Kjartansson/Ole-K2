@@ -2,10 +2,26 @@
   "manifest_version": 3,
   "name": "Ole K2",
   "version": "1.0.0",
-  "description": "Local-only automation bridge. Lets tools on this machine drive this browser via 127.0.0.1. Never publish this; it is remote control by design.",
-  "permissions": ["tabs", "scripting", "activeTab", "alarms"],
-  "host_permissions": ["<all_urls>"],
+  "description": "Kimi's hands in Chrome — the AI clicks, types and reads pages for you. Local only, token-paired, every action visible.",
+  "homepage_url": "https://github.com/Kjartansson/Ole-K2",
+  "icons": {
+    "16": "icons/16.png",
+    "48": "icons/48.png",
+    "128": "icons/128.png"
+  },
+  "action": {
+    "default_title": "Ole K2 — AI browser bridge",
+    "default_icon": {
+      "16": "icons/16.png",
+      "48": "icons/48.png",
+      "128": "icons/128.png"
+    }
+  },
+  "options_page": "options.html",
   "background": { "service_worker": "background.js", "type": "module" },
+  "permissions": ["tabs", "scripting", "alarms", "storage"],
+  "host_permissions": ["<all_urls>"],
+  "storage": { "managed_schema": "schema.json" },
   "content_security_policy": {
     "extension_pages": "script-src 'self'; connect-src ws://127.0.0.1:*"
   }

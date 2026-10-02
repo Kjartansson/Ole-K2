@@ -1,0 +1,16 @@
+{
+  "type": "object",
+  "title": "Ole K2 enterprise policy",
+  "properties": {
+    "token": {
+      "type": "string",
+      "title": "Pairing token",
+      "description": "Deploys the bridge token to managed devices so no manual pairing is needed. Keep it out of version control."
+    },
+    "disabled": {
+      "type": "boolean",
+      "title": "Disable the bridge",
+      "description": "When true, Ole K2 never connects. Default false."
+    }
+  }
+}

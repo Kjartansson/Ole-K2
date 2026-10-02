@@ -1,27 +1,56 @@
-// Local Browser Bridge — connects to a WebSocket server on 127.0.0.1 and
-// executes a fixed vocabulary of tab/DOM commands for local tools.
+// Ole K2 — Kimi Chrome Extension. Connects to a WebSocket server on
+// 127.0.0.1 and executes a fixed vocabulary of tab/DOM commands for local
+// AI tools.
 //
-// Security notes: loopback only; the server must present the token that
-// lives in ~/chrome-bridge/token on this machine; there is no arbitrary-JS
-// eval, only the action vocabulary in RUNNER below. Keep it that way.
+// Security notes: loopback only; the server requires a shared token (paired
+// once via the options page, stored in chrome.storage.local — or a local
+// token.js for developers); there is no arbitrary-JS eval, only the action
+// vocabulary in RUNNER below. Keep it that way.
 //
 // Visibility: every page action flashes a red outline over the element it
-// touches and shows a small "Bridge: <action>" badge in the corner, so the
-// browser's owner can always see what automation is doing.
+// touches and shows a small badge in the corner, so the browser's owner can
+// always see what automation is doing.
 
-import { TOKEN } from "./token.js";
+let token = null;
+let policyDisabled = false;
+try {
+  ({ TOKEN: token } = await import("./token.js")); // dev installs only; not shipped
+} catch { /* store/enterprise installs pair via options or policy */ }
+
+async function loadToken() {
+  // Chrome Enterprise policy wins over everything: an admin can deploy the
+  // token to managed devices, or switch the whole bridge off.
+  try {
+    const managed = await chrome.storage.managed.get(["token", "disabled"]);
+    if (managed.disabled === true) { policyDisabled = true; return null; }
+    policyDisabled = false;
+    if (managed.token) { token = managed.token; return token; }
+  } catch { /* no managed storage without an enterprise policy */ }
+  if (token) return token;
+  const stored = await chrome.storage.local.get("token");
+  token = stored.token || null;
+  return token;
+}
+
+function setBadge() {
+  const on = ws && ws.readyState === WebSocket.OPEN;
+  chrome.action.setBadgeText({ text: on ? "ON" : "" });
+  if (on) chrome.action.setBadgeBackgroundColor({ color: "#137a3f" });
+}
+
 const WS_URL = "ws://127.0.0.1:8765";
 
 let ws = null;
 
-function connect() {
+async function connect() {
+  if (!await loadToken()) { setBadge(); return; } // not paired / policy-disabled
   try {
     ws = new WebSocket(WS_URL);
   } catch {
     setTimeout(connect, 3000);
     return;
   }
-  ws.onopen = () => ws.send(JSON.stringify({ auth: TOKEN }));
+  ws.onopen = () => { ws.send(JSON.stringify({ auth: token })); setBadge(); };
   ws.onmessage = (ev) => {
     let msg;
     try { msg = JSON.parse(ev.data); } catch { return; }
@@ -30,9 +59,17 @@ function connect() {
       (err) => send({ id: msg.id, ok: false, error: String(err && err.message || err) })
     );
   };
-  ws.onclose = () => setTimeout(connect, 3000);
+  ws.onclose = () => { setBadge(); setTimeout(connect, 3000); };
   ws.onerror = () => { try { ws.close(); } catch { /* reconnect via onclose */ } };
 }
+
+chrome.runtime.onMessage.addListener((msg) => {
+  if (msg && msg.type === "reconnect") {
+    token = null; // force a fresh read from storage
+    if (ws) { try { ws.close(); } catch { /* dead already */ } }
+    connect();
+  }
+});
 
 function send(obj) {
   if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify(obj));
@@ -236,6 +273,13 @@ async function handle(msg) {
     case "screenshot": {
       const tab = await chrome.tabs.get(msg.tabId || await activeTabId());
       return await chrome.tabs.captureVisibleTab(tab.windowId, { format: "png" });
+    }
+    case "resize": {
+      const tab = await chrome.tabs.get(msg.tabId || await activeTabId());
+      await chrome.windows.update(tab.windowId, {
+        width: msg.width || 1280, height: msg.height || 800, state: "normal",
+      });
+      return true;
     }
     default:
       throw new Error("unknown cmd: " + cmd);

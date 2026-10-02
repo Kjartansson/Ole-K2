@@ -17,6 +17,7 @@ exec actions: read_text(sel?) read_html(sel?) click(sel) type_text(sel,text)
 press(key) query(sel) exists(sel) scroll(y) url() title()
 """
 import json
+import os
 import socket
 import sys
 
